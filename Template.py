@@ -40,6 +40,46 @@ def readCsv(prolog):
         prolog.assertz("accommodation('" + str(destinations[i][11]) + "')")
         prolog.assertz("language('" + str(destinations[i][12]) + "')")
 
+    return destinations
+
+
+def getFeatures(destinations):
+    mapValues = {
+        "my_destination" : set({}),"country" : set({}),"region" : set({}),
+        "climate": set({}),"budget" : set({}),"activity" : set({}),
+        "demographic": set({}),"duration" : set({}),"cuisine" : set({}),
+        "history": set({}),"natural_wonder": set({}),"accommodation": set({}),
+        "language": set({})
+    }
+    for i in range(1, len(destinations)):
+        destinationKey = mapValues["my_destination"]
+        destinationKey.add(destinations[i][0])
+        destinationKey = mapValues["country"]
+        destinationKey.add(destinations[i][1])
+        destinationKey = mapValues["region"]
+        destinationKey.add(destinations[i][2])
+        destinationKey = mapValues["climate"]
+        destinationKey.add(destinations[i][3])
+        destinationKey = mapValues["budget"]
+        destinationKey.add(destinations[i][4])
+        destinationKey = mapValues["activity"]
+        destinationKey.add(destinations[i][5])
+        destinationKey = mapValues["demographic"]
+        destinationKey.add(destinations[i][6])
+        destinationKey = mapValues["duration"]
+        destinationKey.add(destinations[i][7])
+        destinationKey = mapValues["cuisine"]
+        destinationKey.add(destinations[i][8])
+        destinationKey = mapValues["history"]
+        destinationKey.add(destinations[i][9])
+        destinationKey = mapValues["natural_wonder"]
+        destinationKey.add(destinations[i][10])
+        destinationKey = mapValues["accommodation"]
+        destinationKey.add(destinations[i][11])
+        destinationKey = mapValues["language"]
+        destinationKey.add(destinations[i][12])
+    return mapValues
+
 
 class App(tkinter.Tk):
 
@@ -166,7 +206,8 @@ class App(tkinter.Tk):
 # STEP1: Define the knowledge base of illnesses and their symptoms
 
 prolog = Prolog()
-readCsv(prolog)
+destinations = readCsv(prolog)
+features = getFeatures(destinations)
 
 # prolog.retractall("destination(_, _, _, _, _, _, _, _, _, _, _, _, _)")
 # prolog.assertz("destination('Tokyo', japan, 'East Asia', temperate, high, cultural, solo, long, asian, modern, mountains, luxury, japanese)")
