@@ -90,12 +90,15 @@ class App(tkinter.Tk):
         # Construct Prolog query based on extracted features
         if (len(locations["country"])>0):
             country = locations["country"]
-
+            country = f"'{country}'"
+           
+           
         else:
             country = '_'
 
         if (len(locations["region"])>0):
             region = locations["region"]
+            region = f"'{region}'"
 
         else:
             region = '_'
@@ -133,6 +136,7 @@ class App(tkinter.Tk):
 
         if (len(locations["Cuisine"])>0):
              Cuisine = locations["Cuisine"]
+             Cuisine = f"'{Cuisine}'"
 
         else:
             Cuisine = '_'
@@ -145,6 +149,7 @@ class App(tkinter.Tk):
 
         if (len(locations["Natural Wonder"])>0):
              NaturalWonder = locations["Natural Wonder"]
+             NaturalWonder = f"'{NaturalWonder}'"
 
         else:
             NaturalWonder = '_'
@@ -164,6 +169,7 @@ class App(tkinter.Tk):
        
         #
         query = f"destination(City, {country}, {region}, {climate}, {budget}, {Activity}, {Demographics}, {Duration}, {Cuisine}, {History}, {NaturalWonder}, {Accommodation}, {Language})"
+        print(query)
         results = list(prolog.query(query))
         print(results)
         #locations = self.check_connections(results)
@@ -210,7 +216,7 @@ class App(tkinter.Tk):
 
         
         new_dict = {key: value[0] if value and value[0] != '' else '' for key, value in extracted_features.items()}
-        # print(new_dict)
+        print(new_dict)
         return new_dict
 
 
