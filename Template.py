@@ -5,6 +5,42 @@ from tkintermapview import TkinterMapView
 from pyswip import Prolog
 
 
+def readCsv(prolog):
+    destinationFile = open("Destinations.csv",encoding="utf8")
+    destinations = list(csv.reader(destinationFile))
+
+    prolog.retractall("climate(_,_)")
+    prolog.retractall("budget(_,_)")
+    prolog.retractall("activity(_,_)")
+    prolog.retractall("country(_,_)")
+    prolog.retractall("demographic(_,_)")
+    prolog.retractall("duration(_,_)")
+    prolog.retractall("cuisine(_,_)")
+    prolog.retractall("history(_,_)")
+    prolog.retractall("natural_wonder(_,_)")
+    prolog.retractall("accommodation(_,_)")
+    prolog.retractall("language(_,_)")
+    prolog.retractall("region(_,_)")
+    prolog.retractall("my_destination(_,_)")
+
+    for i in range(1 , len(destinations)):
+        my_destination = str(destinations[i][0])
+        my_destination = my_destination.replace("'", "")
+        prolog.assertz("my_destination('"+my_destination+"')")
+        prolog.assertz("country('" + str(destinations[i][1]) + "')")
+        prolog.assertz("region('" + str(destinations[i][2]) + "')")
+        prolog.assertz("climate('" + str(destinations[i][3]) + "')")
+        prolog.assertz("budget('" + str(destinations[i][4]) + "')")
+        prolog.assertz("activity('" + str(destinations[i][5]) + "')")
+        prolog.assertz("demographic('" + str(destinations[i][6]) + "')")
+        prolog.assertz("duration('" + str(destinations[i][7]) + "')")
+        prolog.assertz("cuisine('" + str(destinations[i][8]) + "')")
+        prolog.assertz("history('" + str(destinations[i][9]) + "')")
+        prolog.assertz("natural_wonder('" + str(destinations[i][10]) + "')")
+        prolog.assertz("accommodation('" + str(destinations[i][11]) + "')")
+        prolog.assertz("language('" + str(destinations[i][12]) + "')")
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
@@ -130,13 +166,14 @@ class App(tkinter.Tk):
 # STEP1: Define the knowledge base of illnesses and their symptoms
 
 prolog = Prolog()
+readCsv(prolog)
 
-prolog.retractall("destination(_, _, _, _, _, _, _, _, _, _, _, _, _)")
-prolog.assertz("destination('Tokyo', japan, 'East Asia', temperate, high, cultural, solo, long, asian, modern, mountains, luxury, japanese)")
-prolog.assertz("destination('Ottawa', canada, 'North America', cold, medium, adventure, family_friendly, medium, european, modern, forests, mid_range, english)")
-prolog.assertz("destination('Mexico City', mexico, 'North America', temperate, low, cultural, senior, short, latin_american, ancient, mountains, budget, spanish)")
-prolog.assertz("destination('Rome', italy, 'Southern Europe', temperate, high, cultural, solo, medium, european, ancient, beaches, luxury, italian)")
-prolog.assertz("destination('Brasilia', brazil, 'South America', tropical, low, adventure, family_friendly, long, latin_american, modern, beaches, budget, portuguese)")
+# prolog.retractall("destination(_, _, _, _, _, _, _, _, _, _, _, _, _)")
+# prolog.assertz("destination('Tokyo', japan, 'East Asia', temperate, high, cultural, solo, long, asian, modern, mountains, luxury, japanese)")
+# prolog.assertz("destination('Ottawa', canada, 'North America', cold, medium, adventure, family_friendly, medium, european, modern, forests, mid_range, english)")
+# prolog.assertz("destination('Mexico City', mexico, 'North America', temperate, low, cultural, senior, short, latin_american, ancient, mountains, budget, spanish)")
+# prolog.assertz("destination('Rome', italy, 'Southern Europe', temperate, high, cultural, solo, medium, european, ancient, beaches, luxury, italian)")
+# prolog.assertz("destination('Brasilia', brazil, 'South America', tropical, low, adventure, family_friendly, long, latin_american, modern, beaches, budget, portuguese)")
 
 
 
