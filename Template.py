@@ -5,6 +5,12 @@ from tkintermapview import TkinterMapView
 from pyswip import Prolog
 
 
+def checkValue(value):
+    if len(value.split(" ")) > 1:
+        value = value.replace(" ", "_")
+    return value.lower()
+
+
 def readCsv(prolog):
     destinationFile = open("Destinations.csv",encoding="utf8")
     destinations = list(csv.reader(destinationFile))
