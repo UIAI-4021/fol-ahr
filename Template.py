@@ -77,6 +77,15 @@ def getFeatures(destinations):
     return mapValues
 
 
+def checkLanguage(languagesList, language):
+    for languages in languagesList:
+        splitLanguage = languages.split(",")
+        if language in splitLanguage:
+            return True
+
+    return False
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
