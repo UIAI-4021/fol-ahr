@@ -196,7 +196,16 @@ class App(tkinter.Tk):
 
         # TODO 4: create the query based on the extracted features of user desciption 
         ################################################################################################
-        query = "destination(City,_, _, _, low, _, _, _, _, _, _, _, _)"
+        query = "destination(City,"
+        for i in range(0, len(locations)):
+            if locations[i] != "":
+                query += locations[i]
+            else:
+                query += "_"
+            if i != len(locations) - 1:
+                query += ","
+            else:
+                query += ")"
         results = list(prolog.query(query))
         print(results)
         locations = self.check_connections(results)
