@@ -120,6 +120,23 @@ def extractData(mapValues, text):
     return extractValues
 
 
+def connectCities(connectionMatrix, prolog):
+    cities = connectionMatrix[0]
+    prolog.retractall("connected(_,_)")
+    prolog.retractall("check_first_connection(_,_)")
+    prolog.retractall("check_second_connection(_,_)")
+
+    for i in range(1, len(connectionMatrix)):
+        cityI = str(cities[i])
+        cityI = cityI.replace("'", "")
+        for j in range(i + 1, len(connectionMatrix[i])):
+            cityJ = str(cities[j])
+            cityJ = cityJ.replace("'", "")
+            if connectionMatrix[i][j] == "1" or connectionMatrix[j][i] == "1":
+                prolog.assertz("connected('" + checkValue(cityI) + "','" + checkValue(cityJ) + "')")
+                prolog.assertz("connected('" + checkValue(cityJ) + "','" + checkValue(cityI) + "')")
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
