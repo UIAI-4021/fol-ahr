@@ -86,6 +86,40 @@ def checkLanguage(languagesList, language):
     return False
 
 
+def extractData(mapValues, text):
+    text = "I would like to travel somewhere in south_america with low budget."
+    text = text.replace(".", "")
+    splitedText = text.split(" ")
+    extractValues = ["" for _ in range(12)]
+    for word in splitedText:
+        word = word.lower()
+        if word in mapValues["country"]:
+            extractValues[0] = word
+        if word in mapValues["region"]:
+            extractValues[1] = word
+        if word in mapValues["climate"]:
+            extractValues[2] = word
+        if word in mapValues["budget"]:
+            extractValues[3] = word
+        if word in mapValues["activity"]:
+            extractValues[4] = word
+        if word in mapValues["demographic"]:
+            extractValues[5] = word
+        if word in mapValues["duration"]:
+            extractValues[6] = word
+        if word in mapValues["cuisine"]:
+            extractValues[7] = word
+        if word in mapValues["history"]:
+            extractValues[8] = word
+        if word in mapValues["natural_wonder"]:
+            extractValues[9] = word
+        if word in mapValues["accommodation"]:
+            extractValues[10] = word
+        if checkLanguage(list(mapValues["language"]), word):
+            extractValues[11] = word
+    return extractValues
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
@@ -201,7 +235,7 @@ class App(tkinter.Tk):
         # TODO 3: extract key features from user's description of destinations
         ################################################################################################
 
-        return [line.strip() for line in text.split('\n') if line.strip()]
+        return extractData(features, text)
 
     def start(self):
         self.mainloop()
