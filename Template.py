@@ -12,39 +12,29 @@ def checkValue(value):
 
 
 def readCsv(prolog):
-    destinationFile = open("Destinations.csv",encoding="utf8")
+    destinationFile = open("Destinations.csv", encoding="utf8")
     destinations = list(csv.reader(destinationFile))
 
-    prolog.retractall("climate(_,_)")
-    prolog.retractall("budget(_,_)")
-    prolog.retractall("activity(_,_)")
-    prolog.retractall("country(_,_)")
-    prolog.retractall("demographic(_,_)")
-    prolog.retractall("duration(_,_)")
-    prolog.retractall("cuisine(_,_)")
-    prolog.retractall("history(_,_)")
-    prolog.retractall("natural_wonder(_,_)")
-    prolog.retractall("accommodation(_,_)")
-    prolog.retractall("language(_,_)")
-    prolog.retractall("region(_,_)")
-    prolog.retractall("my_destination(_,_)")
+    prolog.retractall("destination(_,_,_,_,_,_,_,_,_,_,_,_,_)")
 
-    for i in range(1 , len(destinations)):
+    for i in range(1, len(destinations)):
+        value = "destination('"
         my_destination = str(destinations[i][0])
         my_destination = my_destination.replace("'", "")
-        prolog.assertz("my_destination('"+my_destination+"')")
-        prolog.assertz("country('" + str(destinations[i][1]) + "')")
-        prolog.assertz("region('" + str(destinations[i][2]) + "')")
-        prolog.assertz("climate('" + str(destinations[i][3]) + "')")
-        prolog.assertz("budget('" + str(destinations[i][4]) + "')")
-        prolog.assertz("activity('" + str(destinations[i][5]) + "')")
-        prolog.assertz("demographic('" + str(destinations[i][6]) + "')")
-        prolog.assertz("duration('" + str(destinations[i][7]) + "')")
-        prolog.assertz("cuisine('" + str(destinations[i][8]) + "')")
-        prolog.assertz("history('" + str(destinations[i][9]) + "')")
-        prolog.assertz("natural_wonder('" + str(destinations[i][10]) + "')")
-        prolog.assertz("accommodation('" + str(destinations[i][11]) + "')")
-        prolog.assertz("language('" + str(destinations[i][12]) + "')")
+        value += checkValue(my_destination) + "','"
+        value += checkValue(str(destinations[i][1])) + "','"
+        value += checkValue(str(destinations[i][2])) + "','"
+        value += checkValue(str(destinations[i][3])) + "','"
+        value += checkValue(str(destinations[i][4])) + "','"
+        value += checkValue(str(destinations[i][5])) + "','"
+        value += checkValue(str(destinations[i][6])) + "','"
+        value += checkValue(str(destinations[i][7])) + "','"
+        value += checkValue(str(destinations[i][8])) + "','"
+        value += checkValue(str(destinations[i][9])) + "','"
+        value += checkValue(str(destinations[i][10])) + "','"
+        value += checkValue(str(destinations[i][11])) + "','"
+        value += checkValue(str(destinations[i][12])) + "')"
+        prolog.assertz(value)
 
     return destinations
 
