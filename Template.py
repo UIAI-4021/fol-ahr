@@ -151,6 +151,15 @@ def getConnections(city, prolog):
     return getConnectionList(firstConnections), getConnectionList(secondConnections)
 
 
+def getSecondConnectedCity(firstCityConnections, city2):
+    secondCityConnections = list(prolog.query("check_first_connection('" + city2 + "',X)"))
+    secondCityConnections = getConnectionList(secondCityConnections)
+
+    for city in firstCityConnections:
+        if city in secondCityConnections:
+            return city
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
