@@ -206,6 +206,32 @@ def getExactCities(cityName, cityConnection, results):
     return tour
 
 
+def getQuery(locations, prolog):
+    check = set()
+    query = "destination(City,"
+    for i in range(0, len(locations)):
+        if locations[i] != "":
+            temp = query
+            temp += locations[i] + ","
+            for j in range(i + 1, len(locations)):
+                temp += "_"
+                if j != len(locations) - 1:
+                    temp += ","
+                else:
+                    temp += ")"
+            if i == len(locations) - 1:
+                temp += ")"
+
+            featuresCities = list(prolog.query(temp))
+            check = check | set(getConnectionList(featuresCities, "City"))
+        query += "_"
+        if i != len(locations) - 1:
+            query += ","
+        else:
+            query += ")"
+    return check
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
