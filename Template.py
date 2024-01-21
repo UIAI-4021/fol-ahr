@@ -358,14 +358,27 @@ class App(tkinter.Tk):
         self.marker_list = []  # Keeping track of markers
 
     def check_connections(self, results):
+        matrixFile = open("Adjacency_matrix.csv", encoding="utf8")
+        matrixConnection = list(csv.reader(matrixFile))
         print('result2 ', results)
-        locations = []
+
+        connectCities(matrixConnection, prolog)
+        prolog.assertz("check_first_connection(X,Y) :- connected(X,Y)")
+        prolog.assertz("check_second_connection(X,Y) :- connected(X,Z),connected(Z,Y) , X\=Y")
+
+        temp = []
         for result in results:
-            city  = result["City"]
-            locations.append(city)
-            # TODO 5: create the knowledgebase of the city and its connected destinations using Adjacency_matrix.csv
+            temp.append(result['City'])
+        results = temp
 
+        cityConnection = dict()
+        cityNames = checkCitiesSimilarity(results, cityConnection)
+        if len(cityNames) > 1:
+            locations = getApproximateCities(cityNames, text, prolog, cityConnection, set(results))
+        else:
+            locations = getExactCities(cityNames[0], cityConnection, set(results))
 
+        if len(locations) == 0: return []
         return locations
 
     def process_text(self):
