@@ -168,6 +168,31 @@ def getSimilarCities(cityConnection, key, cities):
     return connections & cities
 
 
+def checkCitiesSimilarity(results, cityConnection):
+    for city in results:
+        firstConnection, secondConnection = getConnections(city, prolog)
+        cityConnection[city] = (firstConnection, secondConnection)
+
+    cityValues = dict()
+    cities = set(results)
+
+    for key in cityConnection.keys():
+        cityValues[key] = len(getSimilarCities(cityConnection, key, cities))
+
+    cityValues = dict(sorted(cityValues.items(), key=lambda item: item[1], reverse=True))
+    max = -1
+    values = []
+    for key, value in cityValues.items():
+        if max == -1:
+            max = cityValues[key]
+            values.append(key)
+        elif max == value:
+            values.append(key)
+        else:
+            break
+    return values
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
