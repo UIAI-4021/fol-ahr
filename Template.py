@@ -232,6 +232,38 @@ def getQuery(locations, prolog):
     return check
 
 
+def checkDifferentQueries(locations, cityConnection, city, prolog):
+    check = []
+    query = "destination(City,"
+    for i in range(0, len(locations)):
+        if locations[i] != "":
+            query += locations[i]
+            temp = query + ","
+            for j in range(i + 1, len(locations)):
+                temp += "_"
+                if j != len(locations) - 1:
+                    temp += ","
+                else:
+                    temp += ")"
+            if i == len(locations) - 1:
+                temp += ")"
+
+            print(temp)
+            input()
+
+            featuresCities = list(prolog.query(temp))
+            similarCities = getSimilarCities(cityConnection, city,
+                                             set(getConnectionList(featuresCities, "City")))
+            check.append(similarCities)
+        else:
+            query += "_"
+        if i != len(locations) - 1:
+            query += ","
+        else:
+            query += ")"
+    return check
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
