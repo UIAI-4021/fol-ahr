@@ -137,6 +137,20 @@ def connectCities(connectionMatrix, prolog):
                 prolog.assertz("connected('" + checkValue(cityJ) + "','" + checkValue(cityI) + "')")
 
 
+def getConnectionList(connections, key="X"):
+    connectionSet = set()
+    for connection in connections:
+        connectionSet.add(connection[key])
+    return list(connectionSet)
+
+
+def getConnections(city, prolog):
+    firstConnections = list(prolog.query("check_first_connection('" + city + "',X)"))
+    secondConnections = list(prolog.query("check_second_connection('" + city + "',X)"))
+
+    return getConnectionList(firstConnections), getConnectionList(secondConnections)
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
