@@ -193,6 +193,19 @@ def checkCitiesSimilarity(results, cityConnection):
     return values
 
 
+def getExactCities(cityName, cityConnection, results):
+    tour = [cityName]
+    similarCities = getSimilarCities(cityConnection, cityName, results)
+    firstConnection = cityConnection[cityName][0]
+    secondConnection = cityConnection[cityName][1]
+    for city in similarCities:
+        if city in firstConnection:
+            tour.append(city)
+        else:
+            tour.append(getSecondConnectedCity(secondConnection, city))
+    return tour
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
