@@ -386,9 +386,6 @@ class App(tkinter.Tk):
         text = self.text_area.get("1.0", "end-1c")  # Get text from text area
         locations = self.extract_locations(text)  # Extract locations (you may use a more complex method here)
 
-
-        # TODO 4: create the query based on the extracted features of user desciption 
-        ################################################################################################
         query = "destination(City,"
         for i in range(0, len(locations)):
             if locations[i] != "":
@@ -399,13 +396,16 @@ class App(tkinter.Tk):
                 query += ","
             else:
                 query += ")"
+        print(query)
+        
         results = list(prolog.query(query))
-        print(results)
-        locations = self.check_connections(results)
-        # TODO 6: if the number of destinations is less than 6 mark and connect them 
-        ################################################################################################
+        if len(results)>5:
+            print("Enter more features about tour that you want to go!!")
+            locations = []
+        else:
+            locations = self.check_connections(results, locations)
         print(locations)
-        locations = ['mexico_city','rome' ,'brasilia']
+        # locations = ['mexico_city', 'rome', 'brasilia']
         self.mark_locations(locations)
 
     def mark_locations(self, locations):
