@@ -264,6 +264,42 @@ def checkDifferentQueries(locations, cityConnection, city, prolog):
     return check
 
 
+def getApproximateCities(cityNames, locations, prolog, cityConnection, results):
+    cityValues = dict()
+    check = getQuery(locations, prolog)
+    for city in cityNames:
+        cityValues[city] = len(getSimilarCities(cityConnection, city, check))
+    cityValues = dict(sorted(cityValues.items(), key=lambda item: item[1], reverse=True))
+
+    selectedCity = list(cityValues.keys())[0]
+    similarCities = getSimilarCities(cityConnection, selectedCity, results)
+    tour = [selectedCity]
+
+    if len(similarCities) > 0:
+        firstConnection = cityConnection[selectedCity][0]
+        secondConnection = cityConnection[selectedCity][1]
+        for city in similarCities:
+            if city in firstConnection:
+                tour.append(city)
+            else:
+                tour.append(getSecondConnectedCity(secondConnection, city))
+    else:
+        check = checkDifferentQueries(locations, cityConnection, selectedCity, prolog)
+        check = check[::-1]
+        for values in check:
+            counter = 5 - len(tour)
+            for city in values:
+                if city not in tour:
+                    tour.append(city)
+                    counter -= 1
+                if counter == 0:
+                    break
+            if len(tour) == 5:
+                break
+
+    return tour
+
+
 class App(tkinter.Tk):
 
     APP_NAME = "map_view_demo.py"
