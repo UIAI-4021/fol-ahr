@@ -3,6 +3,7 @@ import tkinter
 import tkinter.messagebox
 from tkintermapview import TkinterMapView
 from pyswip import Prolog
+import csv
 
 
 def checkValue(value):
@@ -41,39 +42,39 @@ def readCsv(prolog):
 
 def getFeatures(destinations):
     mapValues = {
-        "my_destination" : set({}),"country" : set({}),"region" : set({}),
-        "climate": set({}),"budget" : set({}),"activity" : set({}),
-        "demographic": set({}),"duration" : set({}),"cuisine" : set({}),
-        "history": set({}),"natural_wonder": set({}),"accommodation": set({}),
+        "my_destination": set({}), "country": set({}), "region": set({}),
+        "climate": set({}), "budget": set({}), "activity": set({}),
+        "demographic": set({}), "duration": set({}), "cuisine": set({}),
+        "history": set({}), "natural_wonder": set({}), "accommodation": set({}),
         "language": set({})
     }
     for i in range(1, len(destinations)):
         destinationKey = mapValues["my_destination"]
-        destinationKey.add(destinations[i][0])
+        destinationKey.add(checkValue(destinations[i][0]))
         destinationKey = mapValues["country"]
-        destinationKey.add(destinations[i][1])
+        destinationKey.add(checkValue(destinations[i][1]))
         destinationKey = mapValues["region"]
-        destinationKey.add(destinations[i][2])
+        destinationKey.add(checkValue(destinations[i][2]))
         destinationKey = mapValues["climate"]
-        destinationKey.add(destinations[i][3])
+        destinationKey.add(checkValue(destinations[i][3]))
         destinationKey = mapValues["budget"]
-        destinationKey.add(destinations[i][4])
+        destinationKey.add(checkValue(destinations[i][4]))
         destinationKey = mapValues["activity"]
-        destinationKey.add(destinations[i][5])
+        destinationKey.add(checkValue(destinations[i][5]))
         destinationKey = mapValues["demographic"]
-        destinationKey.add(destinations[i][6])
+        destinationKey.add(checkValue(destinations[i][6]))
         destinationKey = mapValues["duration"]
-        destinationKey.add(destinations[i][7])
+        destinationKey.add(checkValue(destinations[i][7]))
         destinationKey = mapValues["cuisine"]
-        destinationKey.add(destinations[i][8])
+        destinationKey.add(checkValue(destinations[i][8]))
         destinationKey = mapValues["history"]
-        destinationKey.add(destinations[i][9])
+        destinationKey.add(checkValue(destinations[i][9]))
         destinationKey = mapValues["natural_wonder"]
-        destinationKey.add(destinations[i][10])
+        destinationKey.add(checkValue(destinations[i][10]))
         destinationKey = mapValues["accommodation"]
-        destinationKey.add(destinations[i][11])
+        destinationKey.add(checkValue(destinations[i][11]))
         destinationKey = mapValues["language"]
-        destinationKey.add(destinations[i][12])
+        destinationKey.add(checkValue(destinations[i][12]))
     return mapValues
 
 
@@ -87,12 +88,13 @@ def checkLanguage(languagesList, language):
 
 
 def extractData(mapValues, text):
-    text = "I would like to travel somewhere in south_america with low budget."
+    # text = "I would like to travel somewhere in south_america with low budget."
     text = text.replace(".", "")
     splitedText = text.split(" ")
     extractValues = ["" for _ in range(12)]
     for word in splitedText:
         word = word.lower()
+        # print(word)
         if word in mapValues["country"]:
             extractValues[0] = word
         if word in mapValues["region"]:
@@ -158,7 +160,7 @@ def getSecondConnectedCity(firstCityConnections, city2):
     for city in firstCityConnections:
         if city in secondCityConnections:
             return city
-        
+
 
 def getSimilarCities(cityConnection, key, cities):
     firstConnection = set(cityConnection[key][0])
@@ -301,7 +303,6 @@ def getApproximateCities(cityNames, locations, prolog, cityConnection, results):
 
 
 class App(tkinter.Tk):
-
     APP_NAME = "map_view_demo.py"
     WIDTH = 800
     HEIGHT = 750  # This is now the initial size, not fixed.
@@ -322,7 +323,8 @@ class App(tkinter.Tk):
         self.text_area.grid(row=0, column=0, pady=(10, 0), padx=10, sticky="nsew")
 
         self.submit_button = tkinter.Button(self, text="Submit", command=self.process_text)
-        self.submit_button.grid(row=0, column=0, pady=(0, 10), padx=10, sticky="se")  # Placed within the same cell as text area
+        self.submit_button.grid(row=0, column=0, pady=(0, 10), padx=10,
+                                sticky="se")  # Placed within the same cell as text area
 
         # Lower part: Map Widget
         self.map_widget = TkinterMapView(self)
@@ -330,7 +332,6 @@ class App(tkinter.Tk):
 
         self.marker_list = []  # Keeping track of markers
         self.marker_path = None
-
 
     def __init__(self, *args, **kwargs):
         tkinter.Tk.__init__(self, *args, **kwargs)
@@ -347,7 +348,7 @@ class App(tkinter.Tk):
         # Upper part: Text Area and Submit Button
         self.text_area = tkinter.Text(self)
         self.text_area.grid(row=0, column=0, pady=10, padx=10, sticky="nsew")
-        
+
         self.submit_button = tkinter.Button(self, text="Submit", command=self.process_text)
         self.submit_button.grid(row=1, column=0, pady=10, sticky="ew")
 
@@ -357,7 +358,7 @@ class App(tkinter.Tk):
 
         self.marker_list = []  # Keeping track of markers
 
-    def check_connections(self, results):
+    def check_connections(self, results, text):
         matrixFile = open("Adjacency_matrix.csv", encoding="utf8")
         matrixConnection = list(csv.reader(matrixFile))
         print('result2 ', results)
@@ -397,14 +398,14 @@ class App(tkinter.Tk):
             else:
                 query += ")"
         print(query)
-        
+
         results = list(prolog.query(query))
-        if len(results)>5:
+        if len(results) > 5:
             print("Enter more features about tour that you want to go!!")
             locations = []
         else:
             locations = self.check_connections(results, locations)
-        print(locations)
+        # print(locations)
         # locations = ['mexico_city', 'rome', 'brasilia']
         self.mark_locations(locations)
 
@@ -416,7 +417,6 @@ class App(tkinter.Tk):
                 self.marker_list.append(marker)
         self.connect_marker()
         self.map_widget.set_zoom(1)  # Adjust as necessary, 1 is usually the most zoomed out
-
 
     def connect_marker(self):
         print(self.marker_list)
@@ -432,19 +432,11 @@ class App(tkinter.Tk):
             self.marker_path = self.map_widget.set_path(position_list)
 
     def extract_locations(self, text):
-        """Extract locations from text. A placeholder for more complex logic."""
-        # Placeholder: Assuming each line in the text contains a single location name
-        # TODO 3: extract key features from user's description of destinations
-        ################################################################################################
-
         return extractData(features, text)
 
     def start(self):
         self.mainloop()
 
-# TODO 1: read destinations' descriptions from Destinations.csv and add them to the prolog knowledge base
-################################################################################################
-# STEP1: Define the knowledge base of illnesses and their symptoms
 
 prolog = Prolog()
 destinations = readCsv(prolog)
@@ -456,11 +448,6 @@ features = getFeatures(destinations)
 # prolog.assertz("destination('Mexico City', mexico, 'North America', temperate, low, cultural, senior, short, latin_american, ancient, mountains, budget, spanish)")
 # prolog.assertz("destination('Rome', italy, 'Southern Europe', temperate, high, cultural, solo, medium, european, ancient, beaches, luxury, italian)")
 # prolog.assertz("destination('Brasilia', brazil, 'South America', tropical, low, adventure, family_friendly, long, latin_american, modern, beaches, budget, portuguese)")
-
-
-
-# TODO 2: extract unique features from the Destinations.csv and save them in a dictionary
-################################################################################################
 
 
 if __name__ == "__main__":
