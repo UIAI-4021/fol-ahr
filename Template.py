@@ -158,6 +158,14 @@ def getSecondConnectedCity(firstCityConnections, city2):
     for city in firstCityConnections:
         if city in secondCityConnections:
             return city
+        
+
+def getSimilarCities(cityConnection, key, cities):
+    firstConnection = set(cityConnection[key][0])
+    secondConnection = set(cityConnection[key][1])
+
+    connections = firstConnection | secondConnection
+    return connections & cities
 
 
 class App(tkinter.Tk):
