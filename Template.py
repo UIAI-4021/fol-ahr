@@ -9,6 +9,8 @@ import csv
 def checkValue(value):
     if len(value.split(" ")) > 1:
         value = value.replace(" ", "_")
+    if value.count("-")>0:
+        value = value.replace("-","_")
     return value.lower()
 
 
@@ -88,13 +90,11 @@ def checkLanguage(languagesList, language):
 
 
 def extractData(mapValues, text):
-    # text = "I would like to travel somewhere in south_america with low budget."
     text = text.replace(".", "")
     splitedText = text.split(" ")
     extractValues = ["" for _ in range(12)]
     for word in splitedText:
         word = word.lower()
-        # print(word)
         if word in mapValues["country"]:
             extractValues[0] = word
         if word in mapValues["region"]:
@@ -143,7 +143,7 @@ def getConnectionList(connections, key="X"):
     connectionSet = set()
     for connection in connections:
         connectionSet.add(connection[key])
-    return list(connectionSet)
+    return connectionSet
 
 
 def getConnections(city, prolog):
@@ -162,12 +162,62 @@ def getSecondConnectedCity(firstCityConnections, city2):
             return city
 
 
+def getSimilarCities1(cityConnection, key, city):
+    firstConnectionKey = set(cityConnection[key][0])
+    secondConnectionKey = set(cityConnection[key][1])
+
+    firstConnectionCity = set(cityConnection[city][0])
+    secondConnectionCity = set(cityConnection[city][1])
+
+    connections = (firstConnectionCity | secondConnectionCity) & (firstConnectionKey | secondConnectionKey)
+
+    if city in firstConnectionKey or city in secondConnectionKey:
+        return True
+    elif len(connections) > 0:
+        return True
+    return False
+
+
 def getSimilarCities(cityConnection, key, cities):
     firstConnection = set(cityConnection[key][0])
     secondConnection = set(cityConnection[key][1])
 
     connections = firstConnection | secondConnection
     return connections & cities
+
+
+def checkRepeatTour(tours, value):
+    value = set(value)
+    for tour in tours:
+        if set(tour) == value:
+            return True
+    return False
+
+
+def search(baseCity, desCity, value, visited, cityConnections, cityValues, tours, complete):
+    value.append(desCity)
+    cities = list(cityValues[desCity])
+    temp = value
+    for city in cities:
+        if city not in visited:
+            visited.add(city)
+            similarCities = cityValues[city]
+            similarBaseCity = cityValues[baseCity]
+
+            similarity = similarCities & similarBaseCity
+            similarity = similarity.difference(visited)
+
+            if len(similarity) > 0:
+                search(baseCity, city, value, visited, cityConnections, cityValues, tours, False)
+                return
+            elif complete:
+                if city not in cityConnections[desCity][0]:
+                    temp.append(getSecondConnectedCity(cityConnections[desCity][0], city))
+                temp.append(city)
+                if not checkRepeatTour(tours, temp):
+                    tours.append(temp)
+
+    tours.append(value)
 
 
 def checkCitiesSimilarity(results, cityConnection):
@@ -178,34 +228,33 @@ def checkCitiesSimilarity(results, cityConnection):
     cityValues = dict()
     cities = set(results)
 
-    for key in cityConnection.keys():
-        cityValues[key] = len(getSimilarCities(cityConnection, key, cities))
+    selectedCities = cityConnection.keys()
 
-    cityValues = dict(sorted(cityValues.items(), key=lambda item: item[1], reverse=True))
-    max = -1
-    values = []
+    check = False
+    for key in selectedCities:
+        temp = getSimilarCities(cityConnection, key, cities)
+        if len(temp) > 0:
+            check = True
+        cityValues[key] = temp
+
+    if not check:
+        return None
+
+    tours = []
     for key, value in cityValues.items():
-        if max == -1:
-            max = cityValues[key]
-            values.append(key)
-        elif max == value:
-            values.append(key)
-        else:
-            break
-    return values
+        temp = [key]
+        for city in value:
+            visited = {key, city}
+            values = [key]
+            if city in cityConnection[key][1]:
+                secondCity = getSecondConnectedCity(cityConnection[key][0], city)
+                temp.append(secondCity)
+                values.append(secondCity)
+            search(key, city, values, visited, cityConnection, cityValues, tours, True)
+            temp.append(city)
+            tours.append(temp)
 
-
-def getExactCities(cityName, cityConnection, results):
-    tour = [cityName]
-    similarCities = getSimilarCities(cityConnection, cityName, results)
-    firstConnection = cityConnection[cityName][0]
-    secondConnection = cityConnection[cityName][1]
-    for city in similarCities:
-        if city in firstConnection:
-            tour.append(city)
-        else:
-            tour.append(getSecondConnectedCity(secondConnection, city))
-    return tour
+    return tours
 
 
 def getQuery(locations, prolog):
@@ -266,40 +315,44 @@ def checkDifferentQueries(locations, cityConnection, city, prolog):
     return check
 
 
-def getApproximateCities(cityNames, locations, prolog, cityConnection, results):
+def getApproximateCities(cityNames, locations, prolog, cityConnection):
     cityValues = dict()
     check = getQuery(locations, prolog)
     for city in cityNames:
         cityValues[city] = len(getSimilarCities(cityConnection, city, check))
     cityValues = dict(sorted(cityValues.items(), key=lambda item: item[1], reverse=True))
 
+    print(cityValues)
+
     selectedCity = list(cityValues.keys())[0]
-    similarCities = getSimilarCities(cityConnection, selectedCity, results)
     tour = [selectedCity]
 
-    if len(similarCities) > 0:
-        firstConnection = cityConnection[selectedCity][0]
-        secondConnection = cityConnection[selectedCity][1]
-        for city in similarCities:
-            if city in firstConnection:
+    check = checkDifferentQueries(locations, cityConnection, selectedCity, prolog)
+    check = check[::-1]
+    for values in check:
+        counter = 5 - len(tour)
+        for city in values:
+            if city not in tour:
                 tour.append(city)
-            else:
-                tour.append(getSecondConnectedCity(secondConnection, city))
-    else:
-        check = checkDifferentQueries(locations, cityConnection, selectedCity, prolog)
-        check = check[::-1]
-        for values in check:
-            counter = 5 - len(tour)
-            for city in values:
-                if city not in tour:
-                    tour.append(city)
-                    counter -= 1
-                if counter == 0:
-                    break
-            if len(tour) == 5:
+                counter -= 1
+            if counter == 0:
                 break
+        if len(tour) == 5:
+            break
 
     return tour
+
+
+def getBestTour(tours, cities):
+    max = -1
+    selectedTour = 0
+    cities = set(cities)
+    for tour in tours:
+        size = len(set(tour) & cities)
+        if size > max:
+            max = size
+            selectedTour = tour
+    return selectedTour
 
 
 class App(tkinter.Tk):
@@ -373,20 +426,23 @@ class App(tkinter.Tk):
         results = temp
 
         cityConnection = dict()
-        cityNames = checkCitiesSimilarity(results, cityConnection)
-        if len(cityNames) > 1:
-            locations = getApproximateCities(cityNames, text, prolog, cityConnection, set(results))
+        tours = checkCitiesSimilarity(results, cityConnection)
+        if tours is None:
+            locations = getApproximateCities(results, text, prolog, cityConnection)
+            pass
         else:
-            locations = getExactCities(cityNames[0], cityConnection, set(results))
+            locations = getBestTour(tours, results)
 
-        if len(locations) == 0: return []
         return locations
+
+        # TODO 5: create the knowledgebase of the city and its connected destinations using Adjacency_matrix.csv
 
     def process_text(self):
         """Extract locations from the text area and mark them on the map."""
         text = self.text_area.get("1.0", "end-1c")  # Get text from text area
         locations = self.extract_locations(text)  # Extract locations (you may use a more complex method here)
 
+        # TODO 4: create the query based on the extracted features of user desciption
         query = "destination(City,"
         for i in range(0, len(locations)):
             if locations[i] != "":
@@ -398,14 +454,17 @@ class App(tkinter.Tk):
             else:
                 query += ")"
         print(query)
-
+        ################################################################################################
+        #
         results = list(prolog.query(query))
         if len(results) > 5:
             print("Enter more features about tour that you want to go!!")
             locations = []
-        else:
+        elif len(results) != 0:
             locations = self.check_connections(results, locations)
-        # print(locations)
+        # TODO 6: if the number of destinations is less than 6 mark and connect them 
+        ################################################################################################
+        print(locations)
         # locations = ['mexico_city', 'rome', 'brasilia']
         self.mark_locations(locations)
 
@@ -432,22 +491,28 @@ class App(tkinter.Tk):
             self.marker_path = self.map_widget.set_path(position_list)
 
     def extract_locations(self, text):
+        """Extract locations from text. A placeholder for more complex logic."""
+        # Placeholder: Assuming each line in the text contains a single location name
+        # TODO 3: extract key features from user's description of destinations
+        ###############################################################################################
         return extractData(features, text)
+
+        # return [line.strip() for line in text.split('\n') if line.strip()]
 
     def start(self):
         self.mainloop()
 
 
+# TODO 1: read destinations' descriptions from Destinations.csv and add them to the prolog knowledge base
+################################################################################################
+# STEP1: Define the knowledge base of illnesses and their symptoms
+
 prolog = Prolog()
 destinations = readCsv(prolog)
 features = getFeatures(destinations)
 
-# prolog.retractall("destination(_, _, _, _, _, _, _, _, _, _, _, _, _)")
-# prolog.assertz("destination('Tokyo', japan, 'East Asia', temperate, high, cultural, solo, long, asian, modern, mountains, luxury, japanese)")
-# prolog.assertz("destination('Ottawa', canada, 'North America', cold, medium, adventure, family_friendly, medium, european, modern, forests, mid_range, english)")
-# prolog.assertz("destination('Mexico City', mexico, 'North America', temperate, low, cultural, senior, short, latin_american, ancient, mountains, budget, spanish)")
-# prolog.assertz("destination('Rome', italy, 'Southern Europe', temperate, high, cultural, solo, medium, european, ancient, beaches, luxury, italian)")
-# prolog.assertz("destination('Brasilia', brazil, 'South America', tropical, low, adventure, family_friendly, long, latin_american, modern, beaches, budget, portuguese)")
+# TODO 2: extract unique features from the Destinations.csv and save them in a dictionary
+################################################################################################
 
 
 if __name__ == "__main__":
