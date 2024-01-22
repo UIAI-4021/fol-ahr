@@ -9,8 +9,10 @@ import csv
 def checkValue(value):
     if len(value.split(" ")) > 1:
         value = value.replace(" ", "_")
-    if value.count("-")>0:
-        value = value.replace("-","_")
+    if value.count("-") > 0:
+        # print(value)
+        # input()
+        value = value.replace("-", "_")
     return value.lower()
 
 
@@ -95,6 +97,7 @@ def extractData(mapValues, text):
     extractValues = ["" for _ in range(12)]
     for word in splitedText:
         word = word.lower()
+        # print(word)
         if word in mapValues["country"]:
             extractValues[0] = word
         if word in mapValues["region"]:
@@ -178,7 +181,9 @@ def checkRepeatTour(tours, value):
     return False
 
 
-def search(baseCity, desCity, value, visited, cityConnections, cityValues, tours, complete):
+def search(baseCity, city, desCity, value, visited, cityConnections, cityValues, tours, complete):
+    if city not in cityConnections[city][0]:
+        value.append(getSecondConnectedCity(cityConnections[desCity][0], desCity))
     value.append(desCity)
     cities = list(cityValues[desCity])
     temp = value
@@ -192,7 +197,7 @@ def search(baseCity, desCity, value, visited, cityConnections, cityValues, tours
             similarity = similarity.difference(visited)
 
             if len(similarity) > 0:
-                search(baseCity, city, value, visited, cityConnections, cityValues, tours, False)
+                search(baseCity, desCity, city, value, visited, cityConnections, cityValues, tours, False)
                 return
             elif complete:
                 if city not in cityConnections[desCity][0]:
@@ -233,8 +238,8 @@ def checkCitiesSimilarity(results, cityConnection):
             if city in cityConnection[key][1]:
                 secondCity = getSecondConnectedCity(cityConnection[key][0], city)
                 temp.append(secondCity)
-                values.append(secondCity)
-            search(key, city, values, visited, cityConnection, cityValues, tours, True)
+                # values.append(secondCity)
+            search(key, key, city, values, visited, cityConnection, cityValues, tours, True)
             temp.append(city)
             tours.append(temp)
 
@@ -283,9 +288,6 @@ def checkDifferentQueries(locations, cityConnection, city, prolog):
             if i == len(locations) - 1:
                 temp += ")"
 
-            print(temp)
-            input()
-
             featuresCities = list(prolog.query(temp))
             similarCities = getSimilarCities(cityConnection, city,
                                              set(getConnectionList(featuresCities, "City")))
@@ -305,8 +307,6 @@ def getApproximateCities(cityNames, locations, prolog, cityConnection):
     for city in cityNames:
         cityValues[city] = len(getSimilarCities(cityConnection, city, check))
     cityValues = dict(sorted(cityValues.items(), key=lambda item: item[1], reverse=True))
-
-    print(cityValues)
 
     selectedCity = list(cityValues.keys())[0]
     tour = [selectedCity]
@@ -446,6 +446,8 @@ class App(tkinter.Tk):
             locations = []
         elif len(results) != 0:
             locations = self.check_connections(results, locations)
+        else:
+            locations = []
         # TODO 6: if the number of destinations is less than 6 mark and connect them 
         ################################################################################################
         print(locations)
