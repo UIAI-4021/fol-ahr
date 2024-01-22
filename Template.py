@@ -162,22 +162,6 @@ def getSecondConnectedCity(firstCityConnections, city2):
             return city
 
 
-def getSimilarCities1(cityConnection, key, city):
-    firstConnectionKey = set(cityConnection[key][0])
-    secondConnectionKey = set(cityConnection[key][1])
-
-    firstConnectionCity = set(cityConnection[city][0])
-    secondConnectionCity = set(cityConnection[city][1])
-
-    connections = (firstConnectionCity | secondConnectionCity) & (firstConnectionKey | secondConnectionKey)
-
-    if city in firstConnectionKey or city in secondConnectionKey:
-        return True
-    elif len(connections) > 0:
-        return True
-    return False
-
-
 def getSimilarCities(cityConnection, key, cities):
     firstConnection = set(cityConnection[key][0])
     secondConnection = set(cityConnection[key][1])
